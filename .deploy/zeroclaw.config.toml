@@ -1,0 +1,109 @@
+schema_version = 3
+
+[providers]
+
+[skill_bundles.reconsile]
+
+[http_request]
+allowed_private_hosts = ["127.0.0.1", "localhost"]
+
+[providers.models]
+
+[providers.models.openai]
+
+[providers.models.openai.default]
+wire_api = "responses"
+model = "gpt-5.4"
+requires_openai_auth = true
+
+[memory]
+backend = "sqlite.sqlite"
+
+[agents]
+
+[agents.reconcile]
+runtime_profile = "unbounded"
+risk_profile = "balanced"
+model_provider = "openai.default"
+skill_bundles = ["reconsile"]
+
+[onboard_state]
+quickstart_completed = true
+
+[risk_profiles]
+
+[risk_profiles.balanced]
+allowed_commands = ["*"]
+block_high_risk_commands = true
+forbidden_paths = ["/etc", "/root", "/home", "/usr", "/bin", "/sbin", "/lib", "/opt", "/boot", "/dev", "/proc", "/sys", "/var", "/tmp", "~/.ssh", "~/.gnupg", "~/.aws", "~/.config"]
+level = "supervised"
+require_approval_for_medium_risk = false
+sandbox_enabled = true
+workspace_only = true
+auto_approve = [
+    "http_request",
+    "glob_search",
+    "content_search",
+    "memory_recall",
+    "sessions_current",
+    "calculator",
+    "shell",
+]
+
+[runtime_profiles.unbounded]
+agentic = true
+agentic_timeout_secs = 1800
+compact_context = false
+delegation_timeout_secs = 900
+keep_tool_context_turns = 8
+max_actions_per_hour = 4294967295
+max_context_tokens = 128000
+max_cost_per_day_cents = 4294967295
+max_delegation_depth = 8
+max_history_messages = 200
+max_system_prompt_chars = 64000
+max_tool_iterations = 100
+max_tool_result_chars = 64000
+memory_recall_limit = 10
+parallel_tools = true
+shell_timeout_secs = 600
+strict_tool_parsing = false
+
+[risk_profiles.balanced.delegation_policy]
+mode = "allow"
+
+[runtime_profiles]
+
+[runtime_profiles.unbounded.context_compression]
+enabled = false
+identifier_policy = "strict"
+max_passes = 3
+protect_first_n = 3
+protect_last_n = 4
+source_max_chars = 50000
+summary_max_chars = 4000
+threshold_ratio = 0.5
+timeout_secs = 60
+tool_result_retrim_chars = 2000
+
+[runtime_profiles.unbounded.eval]
+enabled = false
+max_retries = 1
+min_quality_score = 0.5
+
+[runtime_profiles.unbounded.history_pruning]
+collapse_tool_results = true
+enabled = false
+keep_recent = 4
+max_tokens = 8192
+
+[runtime_profiles.unbounded.thinking]
+default_level = "medium"
+native_thinking = false
+
+[runtime_profiles.unbounded.tool_receipts]
+enabled = false
+inject_system_prompt = true
+show_in_response = false
+
+[skill_bundles]

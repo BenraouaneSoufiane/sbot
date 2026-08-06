@@ -1,0 +1,4 @@
+interface:
+  display_name: "Get Wallet Holdings"
+  short_description: "Fetch normalized Solana wallet balances and token holdings"
+  default_prompt: "Use getWalletHoldings to retrieve normalized holdings for a Solana wallet."

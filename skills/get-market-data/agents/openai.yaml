@@ -1,0 +1,4 @@
+interface:
+  display_name: "Get Market Data"
+  short_description: "Fetch current market data for Solana tokens"
+  default_prompt: "Use getMarketData to retrieve current market facts for one or more Solana tokens."

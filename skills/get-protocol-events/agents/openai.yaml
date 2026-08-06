@@ -1,0 +1,4 @@
+interface:
+  display_name: "Get Protocol Events"
+  short_description: "Fetch recent protocol events for a Solana address"
+  default_prompt: "Use getProtocolEvents to retrieve recent normalized events for a Solana address."

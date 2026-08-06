@@ -1,0 +1,4 @@
+interface:
+  display_name: "Get Token Metadata"
+  short_description: "Fetch metadata for a Solana token mint"
+  default_prompt: "Use getTokenMetadata to retrieve normalized metadata for a Solana token mint."

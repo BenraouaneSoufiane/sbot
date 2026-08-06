@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create a custom Discord bot · Reconsile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--ink:#17201d;--muted:#65716b;--line:#e1e8e4;--paper:#f7f8f6;--green:#196f4d}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px 'DM Sans',sans-serif;line-height:1.65}header{background:#14231e;color:#fff}header div,main{width:min(760px,calc(100% - 40px));margin:auto}header div{padding:24px 0;display:flex;align-items:center;gap:12px;font:700 18px Manrope}.mark{width:23px;height:23px;background:#b8e986;border-radius:5px;transform:rotate(45deg)}main{padding:64px 0 90px}.eyebrow{color:var(--green);font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase}h1{font:700 clamp(30px,6vw,46px) Manrope;letter-spacing:-1.4px;line-height:1.15;margin:10px 0 16px}h2{font:700 21px Manrope;margin:38px 0 10px}p,li{color:var(--muted)}.intro{font-size:18px}.note{border:1px solid var(--line);border-left:4px solid var(--green);background:#fff;border-radius:10px;padding:17px 20px;margin:28px 0}.note strong{display:block;margin-bottom:3px}.note p{margin:0}ol{padding-left:24px}li+li{margin-top:13px}code{background:#eaf0ed;color:#254638;border-radius:5px;padding:2px 6px}a{color:var(--green);font-weight:600}footer{border-top:1px solid var(--line);padding-top:24px;margin-top:48px;color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+  <header><div><span class="mark"></span>reconsile</div></header>
+  <main>
+    <div class="eyebrow">Discord notifications</div>
+    <h1>Create and connect a custom bot</h1>
+    <p class="intro">Use a Discord bot you control to deliver Reconsile alerts to a server channel or directly to one person.</p>
+    <div class="note"><strong>Keep the token private</strong><p>A bot token grants control of your bot. Store it like a password, never commit it, and reset it immediately if it is exposed.</p></div>
+
+    <h2>1. Create the Discord app</h2>
+    <ol>
+      <li>Open the <a href="https://discord.com/developers/applications">Discord Developer Portal</a> and select <strong>New Application</strong>.</li>
+      <li>Open <strong>Bot</strong>. Copy the bot token, or select <strong>Reset Token</strong> to generate one.</li>
+      <li>For private use without a server, open <strong>Installation</strong>, enable <strong>User Install</strong>, add the <code>applications.commands</code> scope, then install the app using its install link.</li>
+      <li>For a server channel, enable <strong>Guild Install</strong> with the <code>bot</code> scope and grant <strong>View Channels</strong> and <strong>Send Messages</strong>.</li>
+    </ol>
+
+    <h2>2. Get your Discord user ID</h2>
+    <p>Enable <strong>Discord Settings → Advanced → Developer Mode</strong>, right-click your profile, and select <strong>Copy User ID</strong>.</p>
+    <p>Reconsile creates the private DM automatically. You do not need to call Discord's API or find a DM channel ID yourself.</p>
+
+    <h2>3. Connect it to Reconsile</h2>
+    <ol>
+      <li>Open <strong>Connections → Discord</strong>, or step 3 while creating a check.</li>
+      <li>Select <strong>Custom bot</strong> and paste the bot token.</li>
+      <li>Enter the recipient's numeric Discord user ID. Reconsile will resolve and remember the private DM channel.</li>
+      <li>Save, then run a reconciliation that produces an exception.</li>
+    </ol>
+
+    <div class="note"><strong>Troubleshooting</strong><p><code>Missing Access</code> means the bot cannot reach the destination. Check its channel permissions. <code>Cannot send messages to this user</code> means the user must allow or initiate DMs with the app.</p></div>
+    <footer>Reconsile creates a private DM through Discord API v10 and stores its channel ID for future alerts. A webhook URL is not required.</footer>
+  </main>
+</body>
+</html>

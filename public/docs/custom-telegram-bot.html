@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create a custom Telegram bot · Reconsile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--ink:#17201d;--muted:#65716b;--line:#e1e8e4;--paper:#f7f8f6;--green:#196f4d}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px 'DM Sans',sans-serif;line-height:1.65}header{background:#14231e;color:#fff}header div,main{width:min(760px,calc(100% - 40px));margin:auto}header div{padding:24px 0;display:flex;align-items:center;gap:12px;font:700 18px Manrope}.mark{width:23px;height:23px;background:#b8e986;border-radius:5px;transform:rotate(45deg)}main{padding:64px 0 90px}.eyebrow{color:var(--green);font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase}h1{font:700 clamp(30px,6vw,46px) Manrope;letter-spacing:-1.4px;line-height:1.15;margin:10px 0 16px}h2{font:700 21px Manrope;margin:38px 0 10px}p,li{color:var(--muted)}.intro{font-size:18px}.note{border:1px solid var(--line);border-left:4px solid var(--green);background:#fff;border-radius:10px;padding:17px 20px;margin:28px 0}.note strong{display:block;margin-bottom:3px}.note p{margin:0}ol{padding-left:24px}li+li{margin-top:13px}code{background:#eaf0ed;color:#254638;border-radius:5px;padding:2px 6px}a{color:var(--green);font-weight:600}footer{border-top:1px solid var(--line);padding-top:24px;margin-top:48px;color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+  <header><div><span class="mark"></span>reconsile</div></header>
+  <main>
+    <div class="eyebrow">Telegram notifications</div>
+    <h1>Create and connect a custom bot</h1>
+    <p class="intro">Use a Telegram bot you control to deliver structured Reconsile alerts to a private chat, group, or channel.</p>
+    <div class="note"><strong>Keep the token private</strong><p>A bot token grants full control of your bot. Store it like a password and revoke it in @BotFather if it is ever exposed.</p></div>
+    <h2>1. Create the bot with @BotFather</h2>
+    <ol>
+      <li>Open Telegram and start a chat with the verified <a href="https://t.me/BotFather">@BotFather</a> account.</li>
+      <li>Send <code>/newbot</code>.</li>
+      <li>Choose a display name, then a unique username that ends in <code>bot</code>.</li>
+      <li>Copy the HTTP API token that @BotFather returns.</li>
+    </ol>
+    <h2>2. Start the destination chat</h2>
+    <p>Bots cannot begin private conversations. Open your new bot and send <code>/start</code>. For a group, add the bot to the group first. For a channel, add it as an administrator with permission to post messages.</p>
+    <h2>3. Connect it to Reconsile</h2>
+    <ol>
+      <li>Open <strong>Connections → Telegram</strong>, or step 3 while creating a check.</li>
+      <li>Select <strong>Custom bot</strong> and paste the token.</li>
+      <li>Enter the numeric chat ID or the destination’s <code>@username</code>.</li>
+      <li>Save, then run a reconciliation with an exception to verify delivery.</li>
+    </ol>
+    <div class="note"><strong>Troubleshooting</strong><p>If Reconsile cannot find a private username, send the bot <code>/start</code> and retry. Numeric chat IDs are the most reliable option for private chats and groups.</p></div>
+    <h2>Manage or revoke the token</h2>
+    <p>Return to @BotFather and use <code>/mybots</code> to edit your bot. If the token is compromised, revoke it, then update Reconsile with the replacement.</p>
+    <footer>Bot creation and token behavior follow Telegram’s official BotFather workflow.</footer>
+  </main>
+</body>
+</html>

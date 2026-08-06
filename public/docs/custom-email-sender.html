@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Set up a custom email sender · Reconsile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--ink:#17201d;--muted:#65716b;--line:#e1e8e4;--paper:#f7f8f6;--green:#196f4d}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px 'DM Sans',sans-serif;line-height:1.65}header{background:#14231e;color:#fff}header div,main{width:min(760px,calc(100% - 40px));margin:auto}header div{padding:24px 0;display:flex;align-items:center;gap:12px;font:700 18px Manrope}.mark{width:23px;height:23px;background:#b8e986;border-radius:5px;transform:rotate(45deg)}main{padding:64px 0 90px}.eyebrow{color:var(--green);font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase}h1{font:700 clamp(30px,6vw,46px) Manrope;letter-spacing:-1.4px;line-height:1.15;margin:10px 0 16px}h2{font:700 21px Manrope;margin:38px 0 10px}p,li{color:var(--muted)}.intro{font-size:18px}.note{border:1px solid var(--line);border-left:4px solid var(--green);background:#fff;border-radius:10px;padding:17px 20px;margin:28px 0}.note strong{display:block;margin-bottom:3px}.note p{margin:0}ol{padding-left:24px}li+li{margin-top:13px}code{background:#eaf0ed;color:#254638;border-radius:5px;padding:2px 6px}a{color:var(--green);font-weight:600}footer{border-top:1px solid var(--line);padding-top:24px;margin-top:48px;color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+  <header><div><span class="mark"></span>reconsile</div></header>
+  <main>
+    <div class="eyebrow">Email notifications</div>
+    <h1>Set up a custom sender</h1>
+    <p class="intro">Send reconciliation alerts from an address on your company’s domain instead of <code>notifications@reconsile.online</code>.</p>
+    <div class="note"><strong>Before you begin</strong><p>You’ll need access to your domain’s DNS settings and the SMTP or email-provider credentials for the sender address.</p></div>
+    <h2>1. Choose the sender address</h2>
+    <p>Create a dedicated address such as <code>notifications@yourcompany.com</code>. Using a dedicated sender keeps alert traffic separate from personal inboxes.</p>
+    <h2>2. Authenticate your domain</h2>
+    <p>Add the SPF and DKIM records supplied by your email provider to your DNS. If your domain uses DMARC, make sure the new sender aligns with that policy. DNS verification can take several hours.</p>
+    <h2>3. Configure your email provider</h2>
+    <p>Enable SMTP or an approved sending integration for the address. If your provider supports app passwords, use one instead of your normal account password.</p>
+    <h2>4. Select the sender in Reconsile</h2>
+    <ol>
+      <li>Open <strong>Connections</strong> in the desktop app and choose <strong>Gmail</strong>.</li>
+      <li>Under <strong>Send from</strong>, select <strong>Custom sender</strong>.</li>
+      <li>Enter the verified sender address and save the connection.</li>
+      <li>Run a small test reconciliation and confirm the message arrives without an SPF, DKIM, or DMARC warning.</li>
+    </ol>
+    <div class="note"><strong>Prefer the quick setup?</strong><p>Select <code>notifications@reconsile.online</code> in Connections. No custom-domain configuration is needed.</p></div>
+    <footer>Never paste your mailbox password into a shared workspace. Use a revocable app password or provider token where available.</footer>
+  </main>
+</body>
+</html>

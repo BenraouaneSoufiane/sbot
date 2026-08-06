@@ -1,0 +1,4 @@
+interface:
+  display_name: "Get Liquidity"
+  short_description: "Fetch liquidity facts for a Solana token"
+  default_prompt: "Use getLiquidity to retrieve normalized liquidity facts for a Solana token."

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Custom WhatsApp bot · Reconsile</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="docs-page">
+    <div class="eyebrow">WhatsApp notifications</div>
+    <h1>Connect a custom WhatsApp bot</h1>
+    <p class="intro">Use your own Meta WhatsApp Cloud API credentials to send alerts and let the Reconsile agent answer inbound messages.</p>
+    <ol>
+      <li>Create or select a WhatsApp Business app in Meta for Developers.</li>
+      <li>Open <strong>Connections → WhatsApp</strong>, or step 3 while creating a check.</li>
+      <li>Select <strong>Custom bot</strong>, then enter its access token, Phone Number ID, and destination number.</li>
+      <li>In Meta's WhatsApp configuration, set the callback URL to <code>https://reconsile.online/api/webhooks/whatsapp</code>, enter the server's configured verify token, and subscribe to <strong>messages</strong>.</li>
+    </ol>
+    <div class="note"><strong>Keep the token private.</strong><p>Reconsile stores it only in this workspace and never displays it on connection cards.</p></div>
+  </main>
+</body>
+</html>

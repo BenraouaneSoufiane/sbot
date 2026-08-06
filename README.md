@@ -1,4 +1,5 @@
 # Reconsile
+<img width="1942" height="809" alt="ChatGPT Image Aug 6, 2026, 09_58_48 PM" src="https://github.com/user-attachments/assets/69590a36-929c-4d26-a575-5e8d37dac67a" />
 
 Reconsile is a self-hosted reconciliation workspace for comparing operational records, tracking exceptions, and notifying the people who need to act. It combines a responsive browser UI with a Rust/Axum service, durable JSON state, a built-in scheduler, optional ZeroClaw analysis, inbound WhatsApp control, and Solana data tools.
 

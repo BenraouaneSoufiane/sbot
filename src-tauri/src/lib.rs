@@ -1,19 +1,22 @@
 mod models;
 mod reconcile;
-mod solana_skills;
 mod store;
 mod whatsapp;
 
 use axum::{
-    extract::{Path, State},
-    http::StatusCode,
+    extract::{Path, Request, State},
+    http::{header, StatusCode},
+    middleware::{self, Next},
+    response::{IntoResponse, Response},
     routing::{delete, get, post},
     Json, Router,
 };
 use chrono::{Datelike, Timelike, Utc};
 use chrono_tz::Tz;
+use hmac::Mac;
 use models::*;
-use reconcile::{add_log, run_reconciliation, send_notifications, test_source};
+use reconcile::{add_log, run_reconciliation, test_source};
+use serde::Deserialize;
 use serde_json::{json, Value};
 use sha2::Digest;
 use std::{
@@ -100,6 +103,39 @@ impl AppService {
         };
         self.store.save_data(&snapshot).await?;
         Ok(connection)
+    }
+
+    async fn save_settings(&self, mut settings: WorkspaceSettings) -> Result<(), String> {
+        settings.username = settings.username.trim().to_string();
+        settings.workspace = settings.workspace.trim().to_string();
+        if settings.username.is_empty() {
+            return Err("Username cannot be empty".into());
+        }
+        if settings.workspace.is_empty() {
+            return Err("Workspace name cannot be empty".into());
+        }
+        if settings.access_mode != "open" && settings.access_mode != "credentials" {
+            return Err("Access mode must be 'open' or 'credentials'".into());
+        }
+        if settings.access_mode == "credentials" {
+            if settings.password.is_empty() {
+                let existing = self.store.data.lock().await.settings.password.clone();
+                if existing.is_empty() {
+                    return Err("Set a password before requiring credentials".into());
+                }
+                settings.password = existing;
+            } else {
+                settings.password = password_hash(&settings.password);
+            }
+        } else {
+            settings.password = String::new();
+        }
+        let snapshot = {
+            let mut data = self.store.data.lock().await;
+            data.settings = settings;
+            data.clone()
+        };
+        self.store.save_data(&snapshot).await
     }
 
     async fn log_inbound_message(
@@ -336,7 +372,20 @@ impl AppService {
             "complete",
         );
         add_log(&mut run.logs, "run", "Run finished", "complete");
-        let (mut notify_check, connections) = {
+        let notified = result.notified.clone();
+        let notification_error = result.notification_error.clone();
+        let (notification_message, notification_status) = match &notification_error {
+            Some(error) => (error.as_str(), "failed"),
+            None if notified.is_empty() => ("No notifications required", "complete"),
+            None => ("Notifications sent", "complete"),
+        };
+        add_log(
+            &mut run.logs,
+            "notification",
+            notification_message,
+            notification_status,
+        );
+        let snapshot = {
             let mut data = self.store.data.lock().await;
             if let Some(saved) = data.checks.iter_mut().find(|item| item.id == id) {
                 saved.status = run.status.clone();
@@ -364,59 +413,6 @@ impl AppService {
             }
             if let Some(saved) = data.runs.iter_mut().find(|item| item.id == run.id) {
                 *saved = run.clone()
-            }
-            (
-                data.checks
-                    .iter()
-                    .find(|item| item.id == id)
-                    .cloned()
-                    .unwrap(),
-                data.connections.clone(),
-            )
-        };
-        add_log(
-            &mut run.logs,
-            "notification",
-            "Sending configured notifications",
-            "running",
-        );
-        let notification_timeout = std::env::var("NOTIFICATION_TIMEOUT_SECONDS")
-            .ok()
-            .and_then(|value| value.parse::<u64>().ok())
-            .unwrap_or(30);
-        let notification_result = tokio::time::timeout(
-            Duration::from_secs(notification_timeout),
-            send_notifications(&mut notify_check, &result, &connections),
-        )
-        .await
-        .map_err(|_| format!("Notifications timed out after {notification_timeout} seconds"))
-        .and_then(|result| result);
-        let (notified, notification_error) = match notification_result {
-            Ok(channels) => {
-                add_log(
-                    &mut run.logs,
-                    "notification",
-                    if channels.is_empty() {
-                        "No notifications required"
-                    } else {
-                        "Notifications sent"
-                    },
-                    "complete",
-                );
-                (channels, None)
-            }
-            Err(error) => {
-                add_log(&mut run.logs, "notification", &error, "failed");
-                (vec![], Some(error))
-            }
-        };
-        let snapshot = {
-            let mut data = self.store.data.lock().await;
-            if let Some(saved) = data.runs.iter_mut().find(|item| item.id == run.id) {
-                *saved = run.clone()
-            }
-            if let Some(saved) = data.checks.iter_mut().find(|item| item.id == id) {
-                saved.notifications = notify_check.notifications
             }
             data.clone()
         };
@@ -448,13 +444,138 @@ fn capitalize(value: &str) -> String {
         .unwrap_or_default()
 }
 
+fn password_hash(password: &str) -> String {
+    hex::encode(sha2::Sha256::digest(format!("reconsile:{password}").as_bytes()))
+}
+
+fn session_signature(secret: &str, expiry: i64) -> String {
+    let mut mac = hmac::Hmac::<sha2::Sha256>::new_from_slice(secret.as_bytes())
+        .expect("hmac accepts any key length");
+    mac.update(expiry.to_string().as_bytes());
+    hex::encode(mac.finalize().into_bytes())
+}
+
+fn make_session_token(secret: &str) -> String {
+    let expiry = (Utc::now() + chrono::Duration::days(7)).timestamp();
+    format!("{expiry}.{}", session_signature(secret, expiry))
+}
+
+fn verify_session_token(secret: &str, token: &str) -> bool {
+    let mut parts = token.splitn(2, '.');
+    let expiry = match parts.next().and_then(|value| value.parse::<i64>().ok()) {
+        Some(value) => value,
+        None => return false,
+    };
+    let signature = match parts.next() {
+        Some(value) => value,
+        None => return false,
+    };
+    if expiry < Utc::now().timestamp() {
+        return false;
+    }
+    session_signature(secret, expiry) == signature
+}
+
+fn is_public_path(path: &str) -> bool {
+    !path.starts_with("/api/")
+        || path == "/api/health"
+        || path == "/api/auth/status"
+        || path == "/api/auth/login"
+        || path.starts_with("/api/webhooks/")
+}
+
+async fn require_auth(State(service): State<WebState>, request: Request, next: Next) -> Response {
+    let settings = service.store.data.lock().await.settings.clone();
+    if settings.access_mode != "credentials" || settings.password.is_empty() {
+        return next.run(request).await;
+    }
+    let path = request.uri().path().to_string();
+    if is_public_path(&path) {
+        return next.run(request).await;
+    }
+    let authenticated = request
+        .headers()
+        .get(header::COOKIE)
+        .and_then(|value| value.to_str().ok())
+        .and_then(|cookies| {
+            cookies
+                .split(';')
+                .map(str::trim)
+                .find_map(|cookie| cookie.strip_prefix("reconsile_session="))
+        })
+        .map(|token| verify_session_token(&settings.password, token))
+        .unwrap_or(false);
+    if authenticated {
+        return next.run(request).await;
+    }
+    (StatusCode::UNAUTHORIZED, Json(json!({ "error": "Authentication required" }))).into_response()
+}
+
 async fn get_state(State(service): State<WebState>) -> Json<AppData> {
-    Json(service.state().await)
+    let mut data = service.state().await;
+    data.settings.password = String::new();
+    Json(data)
 }
 async fn health() -> Json<Value> {
-    Json(
-        json!({"ok":true,"zeroclaw":if std::env::var("ZEROCLAW_ENABLED").as_deref()==Ok("true"){"connected"}else{"demo"}}),
+    Json(json!({"ok":true,"zeroclaw":"connected"}))
+}
+
+async fn auth_status(State(service): State<WebState>) -> Json<Value> {
+    let settings = service.store.data.lock().await.settings.clone();
+    Json(json!({
+        "authRequired": settings.access_mode == "credentials",
+        "username": settings.username
+    }))
+}
+
+#[derive(Deserialize)]
+struct LoginRequest {
+    password: String,
+}
+
+async fn login(State(service): State<WebState>, Json(body): Json<LoginRequest>) -> Response {
+    let settings = service.store.data.lock().await.settings.clone();
+    let valid = settings.access_mode == "credentials"
+        && !settings.password.is_empty()
+        && password_hash(&body.password) == settings.password;
+    if !valid {
+        return (
+            StatusCode::UNAUTHORIZED,
+            Json(json!({ "error": "Incorrect password" })),
+        )
+            .into_response();
+    }
+    let token = make_session_token(&settings.password);
+    let cookie = format!(
+        "reconsile_session={token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800"
+    );
+    (
+        StatusCode::OK,
+        [(header::SET_COOKIE, cookie)],
+        Json(json!({ "ok": true })),
     )
+        .into_response()
+}
+
+async fn logout() -> Response {
+    let cookie = "reconsile_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0";
+    (
+        StatusCode::OK,
+        [(header::SET_COOKIE, cookie)],
+        Json(json!({ "ok": true })),
+    )
+        .into_response()
+}
+
+async fn save_settings(
+    State(service): State<WebState>,
+    Json(settings): Json<WorkspaceSettings>,
+) -> WebResult<Value> {
+    service
+        .save_settings(settings)
+        .await
+        .map(|_| Json(json!({ "ok": true })))
+        .map_err(|error| web_error(StatusCode::BAD_REQUEST, error))
 }
 async fn save_check(State(service): State<WebState>, Json(check): Json<Check>) -> WebResult<Check> {
     service
@@ -591,6 +712,10 @@ pub fn run() -> Result<(), String> {
         let app = Router::new()
             .route("/api/state", get(get_state))
             .route("/api/health", get(health))
+            .route("/api/auth/status", get(auth_status))
+            .route("/api/auth/login", post(login))
+            .route("/api/auth/logout", post(logout))
+            .route("/api/settings", post(save_settings))
             .route("/api/checks", post(save_check))
             .route("/api/connections", post(save_connection))
             .route("/api/checks/{id}", delete(remove_check))
@@ -602,27 +727,11 @@ pub fn run() -> Result<(), String> {
                 "/api/webhooks/whatsapp",
                 get(whatsapp::verify_webhook).post(whatsapp::receive_webhook),
             )
-            .route(
-                "/api/skills/getWalletHoldings",
-                post(solana_skills::get_wallet_holdings),
-            )
-            .route(
-                "/api/skills/getMarketData",
-                post(solana_skills::get_market_data),
-            )
-            .route(
-                "/api/skills/getTokenMetadata",
-                post(solana_skills::get_token_metadata),
-            )
-            .route(
-                "/api/skills/getLiquidity",
-                post(solana_skills::get_liquidity),
-            )
-            .route(
-                "/api/skills/getProtocolEvents",
-                post(solana_skills::get_protocol_events),
-            )
             .fallback_service(ServeDir::new(web_root).not_found_service(ServeFile::new(index)))
+            .layer(middleware::from_fn_with_state(
+                service.clone(),
+                require_auth,
+            ))
             .layer(TraceLayer::new_for_http())
             .with_state(service);
         let host = std::env::var("HOST").unwrap_or_else(|_| "127.0.0.1".into());

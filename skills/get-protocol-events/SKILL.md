@@ -1,16 +1,17 @@
 ---
 name: get-protocol-events
-description: Retrieve recent Helius-enhanced Solana transactions and protocol events for an address. Use to explain recent wallet, token, program, swap, transfer, NFT, or DeFi activity.
+description: Retrieve recent Helius-enhanced Solana transactions and protocol events for an address directly.
 ---
 
 # getProtocolEvents
 
-Call the Rust backend with the `http_request` tool:
+Call Helius's transaction endpoint directly with the `http_request` tool:
 
-- Method: `POST`
-- URL: `${RECONSILE_API_BASE_URL}/api/skills/getProtocolEvents`
-- Default base URL when not configured: `http://127.0.0.1:4173`
-- JSON body: `{"address":"<base58 Solana address>","limit":20}`
+- Method: `GET`
+- URL: `{HELIUS_API_URL}/v0/addresses/<address>/transactions?api-key=<HELIUS_API_KEY>&limit=<limit>`
+- Default base when `HELIUS_API_URL` is unset: `https://api-mainnet.helius-rpc.com`
 - Limit: 1 to 100; omit it to use 20.
+
+Return `{"skill":"getProtocolEvents","provider":"helius","address":"<address>","events":<response>}`.
 
 Summarize returned events chronologically and distinguish observed facts from interpretation. Do not claim the response is a complete history.

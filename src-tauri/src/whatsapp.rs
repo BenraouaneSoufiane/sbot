@@ -540,9 +540,6 @@ async fn classify_command(
     history: &[String],
     text: &str,
 ) -> Result<InboundCommand, String> {
-    if std::env::var("ZEROCLAW_ENABLED").as_deref() != Ok("true") {
-        return Err("ZEROCLAW_ENABLED must be true for inbound WhatsApp messages".into());
-    }
     let catalog: Vec<_> = checks.iter().map(|c| json!({"id":c.id,"name":c.name,"description":c.description,"prompt":c.prompt,"schedule":c.schedule_config})).collect();
     let prompt = format!(
         r#"You are a security boundary and intent classifier for Reconsile WhatsApp commands.

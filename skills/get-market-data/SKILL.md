@@ -1,23 +1,18 @@
 ---
 name: get-market-data
-description: Retrieve current Jupiter market data plus skill-managed previous/current snapshots and metric deltas for one or more Solana token mints.
+description: Retrieve current Jupiter price/market data for one or more Solana token mints directly from Jupiter.
 ---
 
 # getMarketData
 
-Call the Rust backend with the `http_request` tool:
+Call Jupiter's price endpoint directly with the `http_request` tool:
 
-- Method: `POST`
-- URL: `${RECONSILE_API_BASE_URL}/api/skills/getMarketData`
-- Default base URL when not configured: `http://127.0.0.1:4173`
-- JSON body: `{"token_addresses":["<base58 mint>"]}`
+- Method: `GET`
+- URL: `{JUPITER_API_URL}/price/v3?ids=<comma-separated mints>`
+- Default base when `JUPITER_API_URL` is unset: `https://api.jup.ag`
 - Limit: 1 to 50 token addresses per call.
+- If `JUPITER_API_KEY` is set in the environment, send the header `x-api-key: <key>`.
 
-The endpoint atomically maintains a rolling baseline for every mint and returns:
+Return `{"skill":"getMarketData","provider":"jupiter","data":<response>}`.
 
-- `data`: current Jupiter facts.
-- `snapshots.previous`: the preceding captured facts, when available.
-- `snapshots.current`: the facts captured by this call.
-- `snapshots.comparison`: per-mint changes for price, liquidity, 24-hour price change, volume, and volatility when both snapshots contain those metrics.
-
-Use `snapshots.comparison` for comparisons instead of asking the model, memory, or another tool for a previous market snapshot. A false `baselineAvailable` means this call established the first baseline; do not claim that snapshot storage is missing. Report only that comparison begins with the next observation. Preserve provider units, do not treat missing tokens as zero-priced, and do not calculate values from stale facts.
+Preserve provider units, do not treat missing tokens as zero-priced, and do not calculate values from stale facts. For a change over time, compare against a previous observation you already hold in memory; do not fabricate a baseline.

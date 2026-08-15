@@ -190,10 +190,36 @@ pub struct Connection {
     pub discord_channel_id: Option<String>,
 }
 
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WorkspaceSettings {
+    #[serde(default)]
+    pub username: String,
+    #[serde(default)]
+    pub workspace: String,
+    #[serde(default)]
+    pub access_mode: String,
+    #[serde(default)]
+    pub password: String,
+}
+
+impl Default for WorkspaceSettings {
+    fn default() -> Self {
+        Self {
+            username: "admin".into(),
+            workspace: "Reconsile agent".into(),
+            access_mode: "open".into(),
+            password: String::new(),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct AppData {
     #[serde(default)]
     pub connections: HashMap<String, Connection>,
+    #[serde(default)]
+    pub settings: WorkspaceSettings,
     #[serde(default)]
     pub checks: Vec<Check>,
     #[serde(default)]
@@ -210,13 +236,17 @@ pub struct ReconcileException {
     pub severity: String,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct ReconcileResult {
     pub summary: String,
     pub records: u64,
     pub matched: u64,
     pub exceptions: Vec<ReconcileException>,
     pub mode: String,
+    #[serde(default)]
+    pub notified: Vec<String>,
+    #[serde(default)]
+    pub notification_error: Option<String>,
 }
 
 #[derive(Serialize)]

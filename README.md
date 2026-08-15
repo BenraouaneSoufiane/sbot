@@ -21,6 +21,9 @@ The UI includes overview, checks, run history, and exception views; workspace se
 
 ## Architecture
 
+<img width="512" height="416" alt="image" src="https://github.com/user-attachments/assets/b5cbaa95-ff8d-453f-be34-b3e075c37391" />
+
+
 ```text
 Browser
   └── prebuilt React workspace (web/)

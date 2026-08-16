@@ -5,6 +5,22 @@ Reconsile is a self-hosted reconciliation workspace for comparing operational re
 
 The repository contains a web application, not a desktop runtime. Tauri, Slint, a webview, Node.js, and a graphical display server are not required to run it.
 
+## Run it now (busy users)
+
+```bash
+bash scripts/env-secrets.sh materialize --builtin  # unpack the team's secrets into .env
+cargo run --manifest-path src-tauri/Cargo.toml     # start the app at http://127.0.0.1:4173
+```
+
+That's it — the repository ships an encrypted copy of the team's environment in `.deploy/zeroclaw-secrets/`, so a fresh clone runs without creating API keys. After editing `.env`, refresh the shared copy so the team gets the change:
+
+```bash
+bash scripts/env-secrets.sh store --builtin   # push changed secrets into the repo copy
+# then commit .deploy/zeroclaw-secrets/
+```
+
+Details, the local-`~/.zeroclaw` alternative, and the security note: [Shared environment](#shared-environment-secrets-in-zeroclaws-config).
+
 ## What it does
 
 - Create reconciliation checks from a plain-language statement, one or more data sources, an optional Solana wallet, a schedule, and notification rules.
@@ -54,9 +70,11 @@ No database or JavaScript build tool is required for the checked-in application.
 From the repository root:
 
 ```bash
-cp .env.example .env
+bash scripts/env-secrets.sh materialize --builtin   # shared repo copy -> .env
 cargo run --manifest-path src-tauri/Cargo.toml
 ```
+
+Secret values are stored in a ZeroClaw config file — encrypted at rest with ZeroClaw's keystore — never in plaintext. A shared encrypted copy ships in the repository (`.deploy/zeroclaw-secrets/`), so `materialize --builtin` rebuilds `.env` with the team's keys right after a fresh clone. It needs bash, the `zeroclaw` CLI, and `python3` with `pip install cryptography` (only for the decrypt step — openssl's `enc` cannot do ChaCha20-Poly1305). If you prefer a blank configuration, `cp .env.example .env` instead and fill in your own values.
 
 Open <http://127.0.0.1:4173>. The service loads `.env` without overriding variables already exported by the process.
 
@@ -161,6 +179,49 @@ Reconsile starts in **open** mode: the workspace and API are accessible without 
 
 When credentials are required, Reconsile protects every workspace and data endpoint behind a password and a signed, HttpOnly session cookie. A password is stored only as a SHA-256 hash in the state file and is never returned to the browser. The login page, `/api/health`, `/api/auth/*`, and the WhatsApp webhook remain reachable without a session so the SPA can render its login screen and machine-to-machine integrations keep working. Reconsile has no tenant isolation, so keep it behind a trusted network or a reverse proxy for anything beyond a single trusted user.
 
+## Shared environment (secrets in ZeroClaw's config)
+
+Secret values are stored in a ZeroClaw config file — encrypted at rest (`enc2:<hex>` ChaCha20-Poly1305) under the keystore key in the adjacent `.secret_key` — rather than in plaintext. Two stores are available:
+
+- **Your machine's ZeroClaw config** (`~/.zeroclaw/`) — the default for `store`, `materialize`, and `status`.
+- **A shared copy in the repository** (`.deploy/zeroclaw-secrets/`) — used with `--builtin`, so teammates can materialize a working `.env` right after cloning, without creating API keys from scratch.
+
+```bash
+bash scripts/env-secrets.sh store                        # .env -> local ~/.zeroclaw config
+bash scripts/env-secrets.sh store WHATSAPP_BOT_TOKEN     # or one key at a time
+bash scripts/env-secrets.sh store --builtin              # write into the repo's shared copy instead
+bash scripts/env-secrets.sh materialize --builtin        # fresh clone: repo copy -> .env
+bash scripts/env-secrets.sh status --builtin             # inspect the shared copy
+bash scripts/env-secrets.sh sync-builtin                 # refresh repo copy from your local config
+```
+
+`store` shells out to `zeroclaw config set --no-interactive <path> <value>` for each key. Every key maps to a real ZeroClaw config field: WhatsApp, Telegram, and Discord bot tokens use the matching `channels.*` config (and double as real channel credentials), while keys without a natural home use a generic secret slot — `providers.models.openai.<key>.api_key` — which accepts arbitrary aliases. The mapping lives at the top of `scripts/env-secrets.sh`; keys missing from it are auto-mapped to the generic slot.
+
+The mechanism is the same for every key (each one goes through `zeroclaw config set` and is encrypted with the same keystore), but the *location* inside ZeroClaw's config differs. That is because `zeroclaw config set` does not accept arbitrary keys — it only accepts dotted paths that exist in ZeroClaw's config schema, which has no free-form "any key" store. Each `.env` key therefore lands on a real field, chosen by best fit:
+
+**1. Keys with a natural home → the matching channel config.**
+
+| `.env` key | ZeroClaw path |
+| --- | --- |
+| `WHATSAPP_BOT_TOKEN` | `channels.whatsapp.reconsile.access_token` |
+| `WHATSAPP_APP_SECRET` | `channels.whatsapp.reconsile.app_secret` |
+| `TELEGRAM_BOT_TOKEN` | `channels.telegram.reconsile.bot_token` |
+| `DISCORD_BOT_TOKEN` | `channels.discord.reconsile.bot_token` |
+
+These values *are* channel credentials, and ZeroClaw's schema has exactly those secret fields, so they land in the semantically correct place — and double as real channel credentials if you ever configure ZeroClaw's own WhatsApp, Telegram, or Discord channels.
+
+**2. Keys with no natural home → a generic secret slot.** `BREVO_API_KEY`, `HELIUS_API_KEY`, `BIRDEYE_API_KEY`, and `WHATSAPP_WEBHOOK_VERIFY_TOKEN` are stored at `providers.models.openai.<key>.api_key`. ZeroClaw's schema has no Birdeye, Helius, Brevo, or webhook-verify concept, so no matching field exists. The generic slot works because provider-model aliases are the one place the schema accepts arbitrary names, and `api_key` is a real secret field that is encrypted at rest. The aliases are storage addresses only — nothing references them, so they are inert.
+
+**3. One true exception to "encrypted":** `WHATSAPP_PHONE_NUMBER_ID` is stored at `channels.whatsapp.reconsile.phone_number_id`, a plaintext field in ZeroClaw's schema (not marked as a secret), so it is stored unencrypted. It is an identifier rather than a credential; if you would rather have it encrypted like the rest, point it at the generic slot in the `SECRETS` table — a one-line change.
+
+`materialize` starts from `.env.example` (or the current `.env`), decrypts each stored value with ZeroClaw's keystore key, and writes `.env`. Because the `zeroclaw` CLI never prints stored secrets, decryption reads `config.toml` directly — the same `enc2:<hex>` ChaCha20-Poly1305 format ZeroClaw itself uses. That decrypt is the one step that calls `python3` (a short heredoc); everything else is bash.
+
+The `zeroclaw` binary comes from `ZEROCLAW_BIN` (default `zeroclaw`); the local config directory is taken from `--config-dir`, `ZEROCLAW_CONFIG_DIR`, or `~/.zeroclaw`.
+
+**Team workflow:** keep `.deploy/zeroclaw-secrets/` current by running `sync-builtin` (or `store --builtin`) after editing `.env`, and commit both files. Teammates then run `bash scripts/env-secrets.sh materialize --builtin` after cloning.
+
+**Security note:** the shared copy ships the keystore key next to the ciphertext, so anyone with read access to the repository can decrypt every secret it contains — including the model provider API key. That is the price of letting teammates run without creating keys; keep the repository private. If the key ever leaks, replace `~/.zeroclaw/.secret_key` (move it aside and let ZeroClaw regenerate it), re-run `store`, then `sync-builtin`.
+
 ## Configuration
 
 All supported variables are present in `.env.example`.
@@ -228,7 +289,7 @@ The example nginx configuration uses a 960-second proxy timeout because producti
 
 ```text
 .
-├── .deploy/          # nginx and ZeroClaw deployment examples
+├── .deploy/          # nginx and ZeroClaw deployment examples + shared zeroclaw-secrets/
 ├── public/           # standalone public/static assets
 ├── skills/           # project ZeroClaw Solana skills
 ├── src-tauri/        # Rust service, tests, lockfile, and legacy icon assets

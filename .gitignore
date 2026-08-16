@@ -1,4 +1,8 @@
 src-tauri/target/
 .data/
-.env
 *.log
+
+# .env is rebuilt from ZeroClaw's config: `bash scripts/env-secrets.sh store` pushes secrets,
+# `bash scripts/env-secrets.sh materialize` rebuilds .env. The shared encrypted copy lives in
+# .deploy/zeroclaw-secrets/ and is INTENTIONALLY tracked so teammates can run `materialize --builtin`.
+.env

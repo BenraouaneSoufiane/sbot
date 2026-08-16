@@ -1,0 +1,190 @@
+schema_version = 3
+
+[providers]
+
+[providers.models.openai.birdeye_api_key]
+api_key = "enc2:729a223c787609cc2feb8e1fe35ee945a5696ac033c5d0d35f809bcc9d8f7e59063cd9eac7868f254c0dd78d7eb473120f23ec90fcfda88399118012"
+wire_api = "responses"
+
+[providers.models.openai.helius_api_key]
+api_key = "enc2:673c9a738f1796c387d3ef37dff9626b22ca2f3ab4abe75912a0707cb2e7d545349bb6d4b4fcecb89e2c9b41d10f7412f3518c6e82978a61b5e35581dfc5d373"
+wire_api = "responses"
+
+[channels.discord.reconsile]
+approval_timeout_secs = 0
+archive = false
+bot_token = "enc2:486212c7708bb7c1bc9070751f74f97541ebe08e3472a2e083d967a299cc7edf34e7b650cdfaeef3f9eace7300f9855d61b737270e718911efd79a16fcea3fdbdd1861be16048df8e188da88f4a88f14322637db017f7f32a6316b43d5553916aeef6662"
+draft_update_interval_ms = 0
+enabled = false
+interrupt_on_new_message = false
+listen_to_bots = false
+mention_only = false
+multi_message_delay_ms = 0
+reaction_notifications = "off"
+reply_min_interval_secs = 0
+reply_queue_depth_max = 0
+slash_command_scope = "global"
+slash_commands = false
+stall_timeout_secs = 0
+stream_mode = "off"
+
+[channels.telegram.reconsile]
+api_base_url = "https://api.telegram.org"
+approval_timeout_secs = 120
+bot_token = "enc2:1cfa420c8cd208516e0d78dd3093c189c544828a6c7356b90beb6ed724dbca9527f6074fdd48973d7c7404de3a7678fe25e0e0769e1887770b46e8040b06474519e40025ed6ffe5a2fbc"
+draft_update_interval_ms = 1000
+enabled = false
+interrupt_on_new_message = false
+mention_only = false
+reply_min_interval_secs = 0
+reply_queue_depth_max = 0
+stream_mode = "off"
+
+[providers.models.openai.brevo_api_key]
+api_key = "enc2:972d113d098e113271f8f95bcc823c86a15f36caa9f2500aff8ce0c6e4232be553d638279b31470d17d1356b2eece929896b33379e021c549ade17797d2ef27b10e1a25b1b3c5ce5f35b219d06719b8f0b02e993c03e0a3bd6ead88f850987e7e1e0a05a8cb1813fc5e72fc06ec857352fef107482"
+wire_api = "responses"
+
+[providers.models.openai.whatsapp_webhook_verify_token]
+api_key = "enc2:9e814539fef81f81f6b258069275c0630f404703dbbac0fa33c779289dd91035fb"
+wire_api = "responses"
+
+[channels.whatsapp.reconsile]
+approval_timeout_secs = 0
+dm_policy = "allowlist"
+enabled = false
+group_policy = "allowlist"
+interrupt_on_new_message = false
+mention_only = false
+mode = "business"
+passive_group_context = false
+phone_number_id = "1185675971303135"
+reply_min_interval_secs = 0
+reply_queue_depth_max = 0
+self_chat_mode = false
+app_secret = "enc2:286af671f14408d1c12b130acf58069bddec3bb21bca4ced60f8b898cd47e554216080e6b42a11a46650544c2624ba051d2ef9719544001f6aa6b4e5"
+access_token = "enc2:8053607ba6fa78953862ce9da641f5266de5aa7f0154d8a5fc8a1eec3a22d919d13fa6d09ec679b0467535e33df9bd5832896afffb9adb5ee99a47ae4537d33d8180daa4ac61b912f0a3a138347ff884662d69b02f3f739d6215efcee05f7060962062fb22c63587ac225aff927d686a26268965d5f5e9da3e8ac1a0e043fceaa36ad6c96edaf46345c97f66423acf8806f1127c21bcdbe0c02c10d8a23383d1aec96d290c935f1f6f79ae9b413a9c876100406f9f0e3ff157eb021c34e4191e3768f7140ff896a67d400ec861c2121a255bc723da0a5c732f4ce96532198b93b029faf18731570d"
+
+[channels.discord]
+
+[channels.telegram]
+
+[providers.models.openai.testv2]
+api_key = "enc2:a6a734f48d4adc6a3e6dd159668ce44ba0a8e98b30349877adb74fb2d1743eebf08e7a555a85be311bf627"
+wire_api = "responses"
+
+[providers.models.openai.venice]
+api_key = "enc2:e28bb8665d60cfea6c86a96efa078186bb38586d4f2682a12bcd656ffa836f3f497bc59522be112922a270e8adbd526e4339278ff96590556824ff15997ba981529c6c9625922d90fade84077b32ed3e3dcf7e02bdea89efaa1955"
+uri = "https://api.venice.ai/api/v1"
+model = "openai-gpt-56-sol"
+wire_api = "chat_completions"
+
+[providers.models.openai.alibaba]
+uri = "https://ws-yxdf14oe36wy7m3t.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1"
+model = "deepseek-v4-flash-0731"
+wire_api = "chat_completions"
+api_key = "enc2:54c98541e10b678f642462519f8ca9845fdfb75ff37676c3469dea41bd144ec4f489b6648b0df03415fe2331ba0c182abc712bc4356cfaec906ad3f2bed62b8ed0cfe34e7a22c8512bc04ce1e03e7362605ef1265aead798cc8be7542e2cd585860379640b6289c15ef46266dd8ac55bcc86431c7058d0c8ffbbabc1be890d69ae5b09be46948fd7e6ca73d1ec57d6a306"
+
+[skill_bundles.reconsile]
+
+[channels]
+
+[channels.whatsapp]
+
+[http_request]
+allowed_private_hosts = ["127.0.0.1", "localhost"]
+
+[providers.models]
+
+[providers.models.custom]
+
+[memory]
+backend = "sqlite.sqlite"
+
+[agents]
+
+[agents.reconcile]
+runtime_profile = "unbounded"
+risk_profile = "balanced"
+model_provider = "openai.alibaba"
+skill_bundles = ["reconsile"]
+
+[onboard_state]
+quickstart_completed = true
+
+[risk_profiles]
+
+[risk_profiles.balanced]
+allowed_commands = ["*"]
+block_high_risk_commands = true
+forbidden_paths = ["/etc", "/root", "/home", "/usr", "/bin", "/sbin", "/lib", "/opt", "/boot", "/dev", "/proc", "/sys", "/var", "/tmp", "~/.ssh", "~/.gnupg", "~/.aws", "~/.config"]
+level = "supervised"
+require_approval_for_medium_risk = false
+sandbox_enabled = true
+workspace_only = true
+auto_approve = [
+    "http_request",
+    "glob_search",
+    "content_search",
+    "memory_recall",
+    "sessions_current",
+    "calculator",
+    "shell",
+]
+
+[runtime_profiles.unbounded]
+agentic = true
+agentic_timeout_secs = 1800
+compact_context = false
+delegation_timeout_secs = 900
+keep_tool_context_turns = 8
+max_actions_per_hour = 4294967295
+max_context_tokens = 128000
+max_cost_per_day_cents = 4294967295
+max_delegation_depth = 8
+max_history_messages = 200
+max_system_prompt_chars = 64000
+max_tool_iterations = 100
+max_tool_result_chars = 64000
+memory_recall_limit = 10
+parallel_tools = true
+shell_timeout_secs = 600
+strict_tool_parsing = false
+
+[risk_profiles.balanced.delegation_policy]
+mode = "allow"
+
+[runtime_profiles]
+
+[runtime_profiles.unbounded.context_compression]
+enabled = false
+identifier_policy = "strict"
+max_passes = 3
+protect_first_n = 3
+protect_last_n = 4
+source_max_chars = 50000
+summary_max_chars = 4000
+threshold_ratio = 0.5
+timeout_secs = 60
+tool_result_retrim_chars = 2000
+
+[runtime_profiles.unbounded.eval]
+enabled = false
+max_retries = 1
+min_quality_score = 0.5
+
+[runtime_profiles.unbounded.history_pruning]
+collapse_tool_results = true
+enabled = false
+keep_recent = 4
+max_tokens = 8192
+
+[runtime_profiles.unbounded.thinking]
+default_level = "medium"
+native_thinking = false
+
+[runtime_profiles.unbounded.tool_receipts]
+enabled = false
+inject_system_prompt = true
+show_in_response = false
+
+[skill_bundles]

@@ -126,17 +126,19 @@ Setup guides for custom senders and bots are served from `/docs/` and stored in 
 
 ## Inbound WhatsApp control
 
-The callback is:
+Inbound WhatsApp is handled by the ZeroClaw gateway, which is configured with the `whatsapp.sbot` channel (`[channels.whatsapp.sbot]` in `.deploy/zeroclaw-secrets/config.toml`). Meta delivers webhooks to the gateway's WhatsApp callback, proxied by nginx:
 
 ```text
-https://your-domain.example/api/webhooks/whatsapp
+https://sbot.rest/whatsapp/sbot
 ```
 
-Configure `WHATSAPP_WEBHOOK_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET`, `WHATSAPP_BOT_TOKEN`, and `WHATSAPP_PHONE_NUMBER_ID`. In Meta's developer dashboard, subscribe the WhatsApp Business Account to `messages`.
+Configure the channel in ZeroClaw with the `access_token`, `app_secret`, `verify_token`, and `phone_number_id` for the WhatsApp Business account, and use the same verify token as the callback's `hub.verify_token`. In Meta's developer dashboard, subscribe the WhatsApp Business Account to `messages` and point the callback URL at `https://sbot.rest/whatsapp/sbot`. The gateway verifies the `X-Hub-Signature-256` HMAC-SHA256 signature and the verify token during the subscription handshake.
 
-Inbound POST bodies must have a valid `X-Hub-Signature-256` HMAC-SHA256 signature. Events are deduplicated on disk and recorded in run history. By default, all senders are accepted; set `WHATSAPP_ALLOWED_SENDERS` to a comma-separated allowlist for production.
+Events are deduplicated on disk and recorded in run history. By default, all senders are accepted; the `whatsapp.sbot` channel's peer group (`peer_groups.whatsapp_default`) can be restricted to an explicit sender allowlist for production.
 
 The classifier is intentionally constrained. It can create a check, edit its name/description/statement/schedule, run a check, stop a running check, ask for missing details, provide help, or run one of the wallet skills below. A check created over WhatsApp is handled end-to-end without asking the user for a name, schedule, or enabled flag: the name is generated from the statement when not supplied, the schedule defaults to running immediately (no recurring schedule unless requested), the notification recipient is the requesting user, and the check is executed right away with the result delivered to that user when the run ends. For a skill request it picks the matching skill from the catalog, and the assistant then executes it by delegating the skill's `SKILL.md` instructions to the ZeroClaw agent against the wallet context. Wallet requests are also routed deterministically in Rust: when a message contains a Solana wallet address, the assistant never declines with "no access" — a specific data question is dispatched to the matching wallet skill (portfolio, transactions, security, DeFi, trading, or accounting) and a monitoring/review request creates and runs a check, with the wallet taken from the message rather than only from existing checks. Requests for credentials, filesystem access, destructive operations, or arbitrary commands are rejected before the model is called. Check source credentials are excluded from classifier context. Classification runs through the ZeroClaw agent (`zeroclaw agent -a reconcile`) and is bounded by `WHATSAPP_AGENT_TIMEOUT_SECONDS`.
+
+The ZeroClaw gateway runs the same classifier against the `reconcile` agent for its inbound channel messages. An alternative, legacy path also exists: the Rust service still serves `/api/webhooks/whatsapp` (`GET` verify handshake, `POST` delivery with `X-Hub-Signature-256` HMAC-SHA256 verification) and can be used instead if you prefer to receive webhooks directly in the app.
 
 ## Solana skills
 
@@ -182,7 +184,7 @@ Raydium (`RAYDIUM_API_URL`, default `https://api-v3.raydium.io`), Orca (`ORCA_AP
 | `DELETE` | `/api/exceptions/{id}` | Delete one exception |
 | `POST` | `/api/sources/test` | Fetch and preview a source |
 | `POST` | `/api/connections` | Save a notification connection |
-| `GET`, `POST` | `/api/webhooks/whatsapp` | Verify and receive Meta webhooks |
+| `GET`, `POST` | `/api/webhooks/whatsapp` | Legacy Meta webhook verify/receive (production inbound goes through the ZeroClaw gateway) |
 
 ## Access control
 
@@ -243,19 +245,24 @@ All supported variables are present in `.env.example`.
 | `PORT` | `4173` | Listen port |
 | `WEB_ROOT` | `web` | Static frontend directory |
 | `SBOT_DATA_DIR` | `.data` | State and webhook markers |
-| `RUN_TIMEOUT_SECONDS` | `180` | Maximum reconciliation duration |
+| `SKILLS_DIR` | `skills` | Skill bundle directory read at run time |
 | `ZEROCLAW_BIN` | `zeroclaw` | ZeroClaw executable (agent runs, channel send, secret storage) |
 | `ZEROCLAW_AGENT` | `reconcile` | ZeroClaw agent alias that runs inference |
-| `WHATSAPP_BOT_TOKEN` | unset | Meta Cloud API token (inbound replies) |
-| `WHATSAPP_PHONE_NUMBER_ID` | unset | Meta sender Phone Number ID (inbound replies) |
-| `WHATSAPP_APP_SECRET` | unset | Webhook signature verification |
-| `WHATSAPP_WEBHOOK_VERIFY_TOKEN` | unset | Meta webhook subscription handshake |
-| `WHATSAPP_ALLOWED_SENDERS` | empty (allow all) | Comma-separated inbound sender allowlist |
+| `RUN_TIMEOUT_SECONDS` | `180` | Maximum reconciliation duration |
 | `WHATSAPP_AGENT_TIMEOUT_SECONDS` | `180` | Inbound classifier timeout |
-| `WHATSAPP_GRAPH_API_VERSION` | `v25.0` | Meta Graph API version |
+| `WHATSAPP_BOT_TOKEN` | unset | No longer used by sbot; documented as a secret the ZeroClaw `whatsapp.sbot` channel must carry (`access_token`) |
+| `WHATSAPP_PHONE_NUMBER_ID` | unset | No longer used by sbot; documented as a secret the ZeroClaw `whatsapp.sbot` channel must carry (`phone_number_id`) |
+| `WHATSAPP_APP_SECRET` | unset | No longer used by sbot for inbound; documented as a secret the ZeroClaw `whatsapp.sbot` channel must carry (`app_secret`) |
+| `WHATSAPP_WEBHOOK_VERIFY_TOKEN` | unset | No longer used by sbot; the ZeroClaw `whatsapp.sbot` channel's `verify_token` is the callback's `hub.verify_token` |
 | `SOLANA_RPC_URL` | Solana mainnet public RPC | Wallet holdings provider (read by the agent) |
 | `JUPITER_API_URL` | `https://api.jup.ag` | Jupiter base URL (read by the agent) |
 | `JUPITER_API_KEY` | unset | Optional Jupiter API key |
+| `RAYDIUM_API_URL` | `https://api-v3.raydium.io` | Raydium base URL (read by the agent) |
+| `RAYDIUM_API_KEY` | unset | Optional Raydium API key |
+| `ORCA_API_URL` | `https://api.orca.so` | Orca base URL (read by the agent) |
+| `ORCA_API_KEY` | unset | Optional Orca API key |
+| `DRIFT_API_URL` | `https://api.drift.trade` | Drift base URL (read by the agent) |
+| `DRIFT_API_KEY` | unset | Optional Drift API key |
 | `BIRDEYE_API_URL` | `https://public-api.birdeye.so` | Birdeye base URL (read by the agent) |
 | `BIRDEYE_API_KEY` | unset | Required for liquidity |
 | `HELIUS_API_URL` | `https://api-mainnet.helius-rpc.com` | Helius base URL (read by the agent) |

@@ -1,5 +1,6 @@
 # sbot
-<img width="1942" height="809" alt="ChatGPT Image Aug 6, 2026, 09_58_48 PM" src="https://github.com/user-attachments/assets/69590a36-929c-4d26-a575-5e8d37dac67a" />
+<img width="1024" height="426" alt="image" src="https://github.com/user-attachments/assets/903e6336-1525-4a2b-9914-9790adac5baa" />
+
 
 sbot is a self-hosted reconciliation workspace for comparing operational records, tracking exceptions, and notifying the people who need to act. It combines a responsive browser UI with a thin Rust/Axum shell for state, scheduling, and the WhatsApp webhook. Every reconciliation, WhatsApp classification, and Solana lookup runs on the ZeroClaw agent (`agents.reconcile`), which fetches sources, compares records, and sends notifications through ZeroClaw channels.
 

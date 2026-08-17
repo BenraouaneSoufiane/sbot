@@ -40,20 +40,6 @@ The UI includes overview, checks, run history, and exception views; workspace se
 <img width="1039" height="852" alt="image" src="https://github.com/user-attachments/assets/5fb2326e-da53-4814-ab63-d553bc040bd8" />
 
 
-
-
-```text
-Browser
-  └── prebuilt React workspace (web/)
-       └── Rust HTTP service (Axum)            ZeroClaw (agents.reconcile)
-            ├── workspace CRUD and run APIs       ├── `zeroclaw agent -a reconcile`
-            ├── 30-second schedule evaluator      │    ├── fetches data sources (http_request)
-            ├── atomic JSON persistence           │    ├── reconciliation / classifier / skills
-            └── signed WhatsApp webhook           │    ├── Solana lookups (RPC, Jupiter, Birdeye, Helius)
-                                                 │    └── outbound notifications (channel send)
-                                                 └── gateway (WhatsApp inbound)
-```
-
 The Rust service serves both `/api/*` and the static SPA. Unknown browser routes fall back to `web/index.html`.
 
 ## Requirements

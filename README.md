@@ -37,7 +37,8 @@ The UI includes overview, checks, run history, and exception views; workspace se
 
 ## Architecture
 
-<img width="512" height="416" alt="image" src="https://github.com/user-attachments/assets/b5cbaa95-ff8d-453f-be34-b3e075c37391" />
+<img width="883" height="721" alt="image" src="https://github.com/user-attachments/assets/c4812dc8-0e2a-4837-a4fb-1e309076834f" />
+
 
 
 ```text

@@ -51,7 +51,7 @@ fn source_instructions(source: &Source) -> String {
     )
 }
 
-fn reconciliation_prompt(check: &Check) -> String {
+fn analysis_prompt(check: &Check) -> String {
     let sources = check
         .sources
         .iter()
@@ -62,7 +62,7 @@ fn reconciliation_prompt(check: &Check) -> String {
         "No Solana wallet was configured.".to_string()
     } else {
         format!(
-            "Solana wallet: {}. Use the project Solana skills (getWalletHoldings, getMarketData, getTokenMetadata, getLiquidity, getProtocolEvents) to retrieve the on-chain facts this check requires.",
+            "Solana wallet: {}. Use the project Solana skills (portfolio-balance, get-wallet-holdings, get-market-data, get-token-metadata, get-liquidity, get-protocol-events) or query the Solana JSON-RPC directly to retrieve the on-chain facts this check requires.",
             check.wallet_address
         )
     };
@@ -76,28 +76,33 @@ fn reconciliation_prompt(check: &Check) -> String {
                 .iter()
                 .map(|n| {
                     let label = if n.label.is_empty() { &n.r#type } else { &n.label };
+                    let channel_id = if n.r#type == "whatsapp" {
+                        "whatsapp.sbot"
+                    } else {
+                        n.r#type.as_str()
+                    };
                     format!(
                         "- {}: send with `zeroclaw channel send` using --channel-id {} --recipient {}",
-                        label, n.r#type, n.recipient
+                        label, channel_id, n.recipient
                     )
                 })
                 .collect::<Vec<_>>()
                 .join("\n");
             format!(
-                "If exceptions were found, send each notification using the shell tool:\n  `zeroclaw channel send \"<message>\" --channel-id <type> --recipient <recipient>`\nUse the exception summary as the message. Configured notifications:\n{}",
+                "After the analysis, send a result summary to each configured notification using the shell tool:\n  `zeroclaw channel send \"<message>\" --channel-id <type> --recipient <recipient>`\nThe message must summarize the outcome: matched and exception counts, each exception with its title, detail, amount and severity, or a short confirmation when no exceptions were found. Always send the notification, even when there are no exceptions. Configured notifications:\n{}",
                 list
             )
         }
     };
     format!(
-        r#"You are a reconciliation analyst for the Reconsile workspace. Perform this check end-to-end and return a single strict JSON object with no prose outside it.
+        r#"You are a reconciliation analyst for the sbot workspace. Perform this check end-to-end and return a single strict JSON object with no prose outside it.
 
 Check statement:
 {}
 
 {}
 
-Data sources (fetch each one yourself):
+Data sources (fetch each one yourself with the http_request tool):
 {}
 
 Notifications:
@@ -114,6 +119,10 @@ Return strict JSON with exactly these keys:
 Do not invent data. Never echo source credentials, tokens, or headers into your output. If a source cannot be fetched, report it as an exception rather than failing silently."#,
         check.prompt, wallet, sources, notifications
     )
+}
+
+fn reconciliation_prompt(check: &Check) -> String {
+    analysis_prompt(check)
 }
 
 fn source_test_prompt(source: &Source) -> String {
@@ -136,14 +145,9 @@ Do not invent data. Never echo credentials, tokens, or headers."#,
 async fn run_agent(prompt: &str) -> Result<String, String> {
     let mut command =
         Command::new(std::env::var("ZEROCLAW_BIN").unwrap_or_else(|_| "zeroclaw".into()));
+    let agent = std::env::var("ZEROCLAW_AGENT").unwrap_or_else(|_| "reconcile".into());
     command
-        .args([
-            "agent",
-            "-a",
-            &std::env::var("ZEROCLAW_AGENT").unwrap_or_else(|_| "reconcile".into()),
-            "-m",
-            prompt,
-        ])
+        .args(["agent", "-a", &agent, "-m", prompt])
         .stdin(Stdio::null());
     command.kill_on_drop(true);
     let output = command.output().await.map_err(|e| e.to_string())?;
@@ -154,8 +158,8 @@ async fn run_agent(prompt: &str) -> Result<String, String> {
 }
 
 fn parse_json_object(text: &str) -> Result<Value, String> {
-    let start = text.find('{').ok_or("ZeroClaw did not return JSON")?;
-    let end = text.rfind('}').ok_or("ZeroClaw did not return JSON")?;
+    let start = text.find('{').ok_or("the agent did not return JSON")?;
+    let end = text.rfind('}').ok_or("the agent did not return JSON")?;
     serde_json::from_str(&text[start..=end]).map_err(|e| e.to_string())
 }
 

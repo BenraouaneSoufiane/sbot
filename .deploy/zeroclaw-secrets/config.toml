@@ -10,7 +10,7 @@ wire_api = "responses"
 api_key = "enc2:673c9a738f1796c387d3ef37dff9626b22ca2f3ab4abe75912a0707cb2e7d545349bb6d4b4fcecb89e2c9b41d10f7412f3518c6e82978a61b5e35581dfc5d373"
 wire_api = "responses"
 
-[channels.discord.reconsile]
+[channels.discord.sbot]
 approval_timeout_secs = 0
 archive = false
 bot_token = "enc2:486212c7708bb7c1bc9070751f74f97541ebe08e3472a2e083d967a299cc7edf34e7b650cdfaeef3f9eace7300f9855d61b737270e718911efd79a16fcea3fdbdd1861be16048df8e188da88f4a88f14322637db017f7f32a6316b43d5553916aeef6662"
@@ -28,7 +28,7 @@ slash_commands = false
 stall_timeout_secs = 0
 stream_mode = "off"
 
-[channels.telegram.reconsile]
+[channels.telegram.sbot]
 api_base_url = "https://api.telegram.org"
 approval_timeout_secs = 120
 bot_token = "enc2:1cfa420c8cd208516e0d78dd3093c189c544828a6c7356b90beb6ed724dbca9527f6074fdd48973d7c7404de3a7678fe25e0e0769e1887770b46e8040b06474519e40025ed6ffe5a2fbc"
@@ -44,14 +44,13 @@ stream_mode = "off"
 api_key = "enc2:972d113d098e113271f8f95bcc823c86a15f36caa9f2500aff8ce0c6e4232be553d638279b31470d17d1356b2eece929896b33379e021c549ade17797d2ef27b10e1a25b1b3c5ce5f35b219d06719b8f0b02e993c03e0a3bd6ead88f850987e7e1e0a05a8cb1813fc5e72fc06ec857352fef107482"
 wire_api = "responses"
 
-[providers.models.openai.whatsapp_webhook_verify_token]
-api_key = "enc2:9e814539fef81f81f6b258069275c0630f404703dbbac0fa33c779289dd91035fb"
-wire_api = "responses"
+[providers.models.opencode.sbot]
+api_key = "enc2:e3160bb3f138441d7d5ddd1338a5e2e793ad9762375435285362327e6ae6823b6ae897e5142a8763c57dde431ae1637987b6dcfbaefa9b7ac4819377dd397d3856e6f39d9ff3d57aad5eab0901a095b90220956c65278c28b2b7519e2fa8f0"
 
-[channels.whatsapp.reconsile]
+[channels.whatsapp.sbot]
 approval_timeout_secs = 0
 dm_policy = "allowlist"
-enabled = false
+enabled = true
 group_policy = "allowlist"
 interrupt_on_new_message = false
 mention_only = false
@@ -62,7 +61,8 @@ reply_min_interval_secs = 0
 reply_queue_depth_max = 0
 self_chat_mode = false
 app_secret = "enc2:286af671f14408d1c12b130acf58069bddec3bb21bca4ced60f8b898cd47e554216080e6b42a11a46650544c2624ba051d2ef9719544001f6aa6b4e5"
-access_token = "enc2:8053607ba6fa78953862ce9da641f5266de5aa7f0154d8a5fc8a1eec3a22d919d13fa6d09ec679b0467535e33df9bd5832896afffb9adb5ee99a47ae4537d33d8180daa4ac61b912f0a3a138347ff884662d69b02f3f739d6215efcee05f7060962062fb22c63587ac225aff927d686a26268965d5f5e9da3e8ac1a0e043fceaa36ad6c96edaf46345c97f66423acf8806f1127c21bcdbe0c02c10d8a23383d1aec96d290c935f1f6f79ae9b413a9c876100406f9f0e3ff157eb021c34e4191e3768f7140ff896a67d400ec861c2121a255bc723da0a5c732f4ce96532198b93b029faf18731570d"
+access_token = "enc2:11477f5ea3a298aa93943449b10c599d7bdc1e5db0ad4f24d214e2b4579131a983ce5e0a52bee601a043613e0387c433faa3b5dc0732050686e29b4ddf002b0f01c2ee35f66810fb0ba97656f5c742b7a8daca3f35355f3edd2aa9f83757ecbc7304a63ff920249ea7bac138544dbf334948143e1543987a77b93dda53ba07e30c8b272c7c726cbd0cf31fcaa50ae81a3574bd7c62b74e23a4bec124e0ca545bc24cede3f68f231617cf93501142c53f587409b05af71a8ce474fdf47d8116c54dc1cd39b118a0910c5db8089e8bad3697b52298b7cfb25e22beba4813a1f0dd50e27cf00f03a8fa"
+verify_token = "enc2:c78a6bc4aece30910791f6c9f7d074a5159be32f5646adadae7fbbbffe787db4f3"
 
 [channels.discord]
 
@@ -72,19 +72,7 @@ access_token = "enc2:8053607ba6fa78953862ce9da641f5266de5aa7f0154d8a5fc8a1eec3a2
 api_key = "enc2:a6a734f48d4adc6a3e6dd159668ce44ba0a8e98b30349877adb74fb2d1743eebf08e7a555a85be311bf627"
 wire_api = "responses"
 
-[providers.models.openai.venice]
-api_key = "enc2:e28bb8665d60cfea6c86a96efa078186bb38586d4f2682a12bcd656ffa836f3f497bc59522be112922a270e8adbd526e4339278ff96590556824ff15997ba981529c6c9625922d90fade84077b32ed3e3dcf7e02bdea89efaa1955"
-uri = "https://api.venice.ai/api/v1"
-model = "openai-gpt-56-sol"
-wire_api = "chat_completions"
-
-[providers.models.openai.alibaba]
-uri = "https://ws-yxdf14oe36wy7m3t.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1"
-model = "deepseek-v4-flash-0731"
-wire_api = "chat_completions"
-api_key = "enc2:54c98541e10b678f642462519f8ca9845fdfb75ff37676c3469dea41bd144ec4f489b6648b0df03415fe2331ba0c182abc712bc4356cfaec906ad3f2bed62b8ed0cfe34e7a22c8512bc04ce1e03e7362605ef1265aead798cc8be7542e2cd585860379640b6289c15ef46266dd8ac55bcc86431c7058d0c8ffbbabc1be890d69ae5b09be46948fd7e6ca73d1ec57d6a306"
-
-[skill_bundles.reconsile]
+[skill_bundles.sbot]
 
 [channels]
 
@@ -92,6 +80,18 @@ api_key = "enc2:54c98541e10b678f642462519f8ca9845fdfb75ff37676c3469dea41bd144ec4
 
 [http_request]
 allowed_private_hosts = ["127.0.0.1", "localhost"]
+
+[opencode_cli]
+enabled = true
+env_passthrough = [
+    "SOLANA_RPC_URL",
+    "JUPITER_API_URL",
+    "JUPITER_API_KEY",
+    "BIRDEYE_API_URL",
+    "BIRDEYE_API_KEY",
+    "HELIUS_API_URL",
+    "HELIUS_API_KEY",
+]
 
 [providers.models]
 
@@ -105,8 +105,7 @@ backend = "sqlite.sqlite"
 [agents.reconcile]
 runtime_profile = "unbounded"
 risk_profile = "balanced"
-model_provider = "openai.alibaba"
-skill_bundles = ["reconsile"]
+skill_bundles = ["sbot"]
 
 [onboard_state]
 quickstart_completed = true
@@ -129,6 +128,7 @@ auto_approve = [
     "sessions_current",
     "calculator",
     "shell",
+    "opencode_cli",
 ]
 
 [runtime_profiles.unbounded]

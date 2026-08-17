@@ -1,0 +1,4 @@
+interface:
+  display_name: "Trading & Swaps"
+  short_description: "Check prices, quote and compare swaps, review trading activity, and estimate P&L"
+  default_prompt: "Use tradingSwaps to answer price, swap, and P&L questions."

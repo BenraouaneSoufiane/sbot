@@ -1,12 +1,12 @@
 [package]
-name = "reconsile"
+name = "sbot"
 version = "0.1.0"
-description = "Rust web server for the Reconsile workspace"
-authors = ["Reconsile"]
+description = "Rust web server for the sbot workspace"
+authors = ["sbot"]
 edition = "2021"
 
 [lib]
-name = "reconsile_lib"
+name = "sbot_lib"
 crate-type = ["rlib"]
 
 [dependencies]

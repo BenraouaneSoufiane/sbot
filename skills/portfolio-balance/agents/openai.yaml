@@ -1,0 +1,4 @@
+interface:
+  display_name: "Portfolio & Balance"
+  short_description: "Check wallet balances, portfolio value, fee reserve, and deposit/withdrawal status"
+  default_prompt: "Use portfolioBalance to check a wallet's portfolio, balances, and deposits."

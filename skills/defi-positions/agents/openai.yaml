@@ -1,0 +1,4 @@
+interface:
+  display_name: "DeFi Positions"
+  short_description: "Check staking, LP, lending, collateral, farming, and APY positions"
+  default_prompt: "Use defiPositions to check a wallet's DeFi positions and risks."

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Create a custom Discord bot · Reconsile</title>
+  <title>Create a custom Discord bot · sbot</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700&display=swap" rel="stylesheet">
@@ -12,11 +12,11 @@
   </style>
 </head>
 <body>
-  <header><div><span class="mark"></span>reconsile</div></header>
+  <header><div><span class="mark"></span>sbot</div></header>
   <main>
     <div class="eyebrow">Discord notifications</div>
     <h1>Create and connect a custom bot</h1>
-    <p class="intro">Use a Discord bot you control to deliver Reconsile alerts to a server channel or directly to one person.</p>
+    <p class="intro">Use a Discord bot you control to deliver sbot alerts to a server channel or directly to one person.</p>
     <div class="note"><strong>Keep the token private</strong><p>A bot token grants control of your bot. Store it like a password, never commit it, and reset it immediately if it is exposed.</p></div>
 
     <h2>1. Create the Discord app</h2>
@@ -29,18 +29,18 @@
 
     <h2>2. Get your Discord user ID</h2>
     <p>Enable <strong>Discord Settings → Advanced → Developer Mode</strong>, right-click your profile, and select <strong>Copy User ID</strong>.</p>
-    <p>Reconsile creates the private DM automatically. You do not need to call Discord's API or find a DM channel ID yourself.</p>
+    <p>sbot creates the private DM automatically. You do not need to call Discord's API or find a DM channel ID yourself.</p>
 
-    <h2>3. Connect it to Reconsile</h2>
+    <h2>3. Connect it to sbot</h2>
     <ol>
       <li>Open <strong>Connections → Discord</strong>, or step 3 while creating a check.</li>
       <li>Select <strong>Custom bot</strong> and paste the bot token.</li>
-      <li>Enter the recipient's numeric Discord user ID. Reconsile will resolve and remember the private DM channel.</li>
+      <li>Enter the recipient's numeric Discord user ID. sbot will resolve and remember the private DM channel.</li>
       <li>Save, then run a reconciliation that produces an exception.</li>
     </ol>
 
     <div class="note"><strong>Troubleshooting</strong><p><code>Missing Access</code> means the bot cannot reach the destination. Check its channel permissions. <code>Cannot send messages to this user</code> means the user must allow or initiate DMs with the app.</p></div>
-    <footer>Reconsile creates a private DM through Discord API v10 and stores its channel ID for future alerts. A webhook URL is not required.</footer>
+    <footer>sbot creates a private DM through Discord API v10 and stores its channel ID for future alerts. A webhook URL is not required.</footer>
   </main>
 </body>
 </html>

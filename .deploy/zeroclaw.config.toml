@@ -2,23 +2,36 @@ schema_version = 3
 
 [providers]
 
-[skill_bundles.reconsile]
+[skill_bundles.sbot]
 
 [http_request]
 allowed_private_hosts = ["127.0.0.1", "localhost"]
 
+# All reconciliation/classification/skill inference runs inside the ZeroClaw
+# gateway agent (agents.reconcile) via model_provider opencode.sbot.
+# env_passthrough exposes the Solana provider URLs/keys so the agent's shell
+# and opencode_cli tool calls can use them.
+[opencode_cli]
+enabled = true
+env_passthrough = [
+    "SOLANA_RPC_URL",
+    "JUPITER_API_URL",
+    "JUPITER_API_KEY",
+    "RAYDIUM_API_URL",
+    "RAYDIUM_API_KEY",
+    "ORCA_API_URL",
+    "ORCA_API_KEY",
+    "DRIFT_API_URL",
+    "DRIFT_API_KEY",
+    "BIRDEYE_API_URL",
+    "BIRDEYE_API_KEY",
+    "HELIUS_API_URL",
+    "HELIUS_API_KEY",
+]
+
 [providers.models]
 
 [providers.models.custom]
-
-[providers.models.openai.alibaba]
-uri = "https://<your-deployment>.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1"
-model = "deepseek-v4-flash-0731"
-wire_api = "chat_completions"
-# Store the API key in ZeroClaw's secrets store (never commit it):
-#   zeroclaw config set providers.models.openai.alibaba.api_key <KEY>
-# IMPORTANT: keep Alibaba under the `openai` family (not `custom`/`deepseek`)
-# so the agent gets native tool calling and http_request receives a string body.
 
 [memory]
 backend = "sqlite.sqlite"
@@ -35,8 +48,25 @@ backend = "sqlite.sqlite"
 [agents.reconcile]
 runtime_profile = "unbounded"
 risk_profile = "balanced"
-model_provider = "openai.alibaba"
-skill_bundles = ["reconsile"]
+skill_bundles = ["sbot"]
+model_provider = "opencode.sbot"
+channels = ["whatsapp.sbot"]
+
+# WhatsApp Cloud API inbound is handled by the gateway agent (agents.reconcile)
+# via model_provider opencode.sbot. Outbound reconciliation notifications
+# are sent by the agent via:
+#   zeroclaw channel send "<message>" --channel-id whatsapp.sbot --recipient <r>
+# The whatsapp webhook callback URL is https://sbot.rest/whatsapp/sbot
+# (see .deploy/sbot.rest.nginx); verify_token lives in the secrets config.
+
+# Sender allowlist for the WhatsApp channel. "*" matches every number; replace
+# with explicit phone numbers (E.164) to restrict who may message the agent.
+[peer_groups.whatsapp_default]
+channel = "whatsapp"
+external_peers = ["*"]
+
+[providers.models.opencode.sbot]
+model = "deepseek-v4-flash-free"
 
 [onboard_state]
 quickstart_completed = true
@@ -59,6 +89,7 @@ auto_approve = [
     "sessions_current",
     "calculator",
     "shell",
+    "opencode_cli",
 ]
 
 [runtime_profiles.unbounded]

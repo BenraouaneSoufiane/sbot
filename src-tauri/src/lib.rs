@@ -372,8 +372,23 @@ impl AppService {
             "complete",
         );
         add_log(&mut run.logs, "run", "Run finished", "complete");
-        let notified = result.notified.clone();
-        let notification_error = result.notification_error.clone();
+        let mut notified = result.notified.clone();
+        let mut notification_error = result.notification_error.clone();
+        let connection = {
+            let state = self.state().await;
+            state.connections.get("whatsapp").cloned()
+        };
+        match crate::whatsapp::send_check_whatsapp_notifications(
+            connection.as_ref(),
+            &check,
+            &result,
+        )
+        .await
+        {
+            Ok(ids) => notified.extend(ids),
+            Err(error) if notification_error.is_none() => notification_error = Some(error),
+            Err(_) => {}
+        }
         let (notification_message, notification_status) = match &notification_error {
             Some(error) => (error.as_str(), "failed"),
             None if notified.is_empty() => ("No notifications required", "complete"),
@@ -445,7 +460,7 @@ fn capitalize(value: &str) -> String {
 }
 
 fn password_hash(password: &str) -> String {
-    hex::encode(sha2::Sha256::digest(format!("reconsile:{password}").as_bytes()))
+    hex::encode(sha2::Sha256::digest(format!("sbot:{password}").as_bytes()))
 }
 
 fn session_signature(secret: &str, expiry: i64) -> String {
@@ -501,7 +516,7 @@ async fn require_auth(State(service): State<WebState>, request: Request, next: N
             cookies
                 .split(';')
                 .map(str::trim)
-                .find_map(|cookie| cookie.strip_prefix("reconsile_session="))
+                .find_map(|cookie| cookie.strip_prefix("sbot_session="))
         })
         .map(|token| verify_session_token(&settings.password, token))
         .unwrap_or(false);
@@ -547,7 +562,7 @@ async fn login(State(service): State<WebState>, Json(body): Json<LoginRequest>) 
     }
     let token = make_session_token(&settings.password);
     let cookie = format!(
-        "reconsile_session={token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800"
+        "sbot_session={token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800"
     );
     (
         StatusCode::OK,
@@ -558,7 +573,7 @@ async fn login(State(service): State<WebState>, Json(body): Json<LoginRequest>) 
 }
 
 async fn logout() -> Response {
-    let cookie = "reconsile_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0";
+    let cookie = "sbot_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0";
     (
         StatusCode::OK,
         [(header::SET_COOKIE, cookie)],
@@ -635,6 +650,13 @@ async fn run_check(
         .await
         .map_err(|error| web_error(StatusCode::INTERNAL_SERVER_ERROR, error))?
         .map(Json)
+        .map_err(|e| web_error(StatusCode::BAD_REQUEST, e))
+}
+
+async fn stop_check(State(service): State<WebState>, Path(id): Path<String>) -> WebResult<Value> {
+    service
+        .stop_run(&id)
+        .map(|_| Json(json!({"ok":true})))
         .map_err(|e| web_error(StatusCode::BAD_REQUEST, e))
 }
 
@@ -723,6 +745,7 @@ pub fn run() -> Result<(), String> {
             .route("/api/exceptions/{id}", delete(remove_exception))
             .route("/api/sources/test", post(source_test))
             .route("/api/checks/{id}/run", post(run_check))
+            .route("/api/checks/{id}/stop", post(stop_check))
             .route(
                 "/api/webhooks/whatsapp",
                 get(whatsapp::verify_webhook).post(whatsapp::receive_webhook),
@@ -742,7 +765,7 @@ pub fn run() -> Result<(), String> {
         let listener = tokio::net::TcpListener::bind((host.as_str(), port))
             .await
             .map_err(|e| e.to_string())?;
-        println!("Reconsile running at http://{host}:{port}");
+        println!("sbot running at http://{host}:{port}");
         axum::serve(listener, app).await.map_err(|e| e.to_string())
     })
 }
@@ -768,7 +791,7 @@ mod tests {
     #[tokio::test]
     async fn inbound_history_is_deduplicated_and_keeps_the_reply() {
         let path = std::env::temp_dir().join(format!(
-            "reconsile-inbound-history-{}.json",
+            "sbot-inbound-history-{}.json",
             Utc::now().timestamp_nanos_opt().unwrap_or_default()
         ));
         let service = AppService {

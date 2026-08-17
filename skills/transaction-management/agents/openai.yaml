@@ -1,0 +1,4 @@
+interface:
+  display_name: "Transaction Management"
+  short_description: "Review, categorize, verify, and reconcile wallet transactions"
+  default_prompt: "Use transactionManagement to review, categorize, and reconcile a wallet's transactions."

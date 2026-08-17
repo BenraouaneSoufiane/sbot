@@ -83,10 +83,15 @@ pub struct Notification {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ScheduleConfig {
+    #[serde(default)]
     pub frequency: String,
+    #[serde(default)]
     pub time: String,
+    #[serde(default)]
     pub weekday: String,
+    #[serde(default)]
     pub timezone: String,
+    #[serde(default)]
     pub enabled: bool,
 }
 
@@ -207,7 +212,7 @@ impl Default for WorkspaceSettings {
     fn default() -> Self {
         Self {
             username: "admin".into(),
-            workspace: "Reconsile agent".into(),
+            workspace: "sbot agent".into(),
             access_mode: "open".into(),
             password: String::new(),
         }

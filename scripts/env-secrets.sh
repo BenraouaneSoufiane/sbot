@@ -54,12 +54,12 @@ ZEROCLAW_BIN="${ZEROCLAW_BIN:-zeroclaw}"
 # auto-mapped to providers.models.openai.<key_lower>.api_key during store, but
 # only keys in this table are materialized back into .env.
 SECRETS=(
-  "WHATSAPP_BOT_TOKEN channels.whatsapp.reconsile.access_token"
-  "WHATSAPP_APP_SECRET channels.whatsapp.reconsile.app_secret"
-  "WHATSAPP_PHONE_NUMBER_ID channels.whatsapp.reconsile.phone_number_id"
-  "TELEGRAM_BOT_TOKEN channels.telegram.reconsile.bot_token"
-  "DISCORD_BOT_TOKEN channels.discord.reconsile.bot_token"
-  "WHATSAPP_WEBHOOK_VERIFY_TOKEN providers.models.openai.whatsapp_webhook_verify_token.api_key"
+  "WHATSAPP_BOT_TOKEN channels.whatsapp.sbot.access_token"
+  "WHATSAPP_APP_SECRET channels.whatsapp.sbot.app_secret"
+  "WHATSAPP_PHONE_NUMBER_ID channels.whatsapp.sbot.phone_number_id"
+  "WHATSAPP_WEBHOOK_VERIFY_TOKEN channels.whatsapp.sbot.verify_token"
+  "TELEGRAM_BOT_TOKEN channels.telegram.sbot.bot_token"
+  "DISCORD_BOT_TOKEN channels.discord.sbot.bot_token"
   "BREVO_API_KEY providers.models.openai.brevo_api_key.api_key"
   "HELIUS_API_KEY providers.models.openai.helius_api_key.api_key"
   "BIRDEYE_API_KEY providers.models.openai.birdeye_api_key.api_key"

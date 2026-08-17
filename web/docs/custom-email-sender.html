@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Set up a custom email sender · Reconsile</title>
+  <title>Set up a custom email sender · sbot</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700&display=swap" rel="stylesheet">
@@ -12,11 +12,11 @@
   </style>
 </head>
 <body>
-  <header><div><span class="mark"></span>reconsile</div></header>
+  <header><div><span class="mark"></span>sbot</div></header>
   <main>
     <div class="eyebrow">Email notifications</div>
     <h1>Set up a custom sender</h1>
-    <p class="intro">Send reconciliation alerts from an address on your company’s domain instead of <code>notifications@reconsile.online</code>.</p>
+    <p class="intro">Send reconciliation alerts from an address on your company’s domain instead of <code>notifications@sbot.rest</code>.</p>
     <div class="note"><strong>Before you begin</strong><p>You’ll need access to your domain’s DNS settings and the SMTP or email-provider credentials for the sender address.</p></div>
     <h2>1. Choose the sender address</h2>
     <p>Create a dedicated address such as <code>notifications@yourcompany.com</code>. Using a dedicated sender keeps alert traffic separate from personal inboxes.</p>
@@ -24,14 +24,14 @@
     <p>Add the SPF and DKIM records supplied by your email provider to your DNS. If your domain uses DMARC, make sure the new sender aligns with that policy. DNS verification can take several hours.</p>
     <h2>3. Configure your email provider</h2>
     <p>Enable SMTP or an approved sending integration for the address. If your provider supports app passwords, use one instead of your normal account password.</p>
-    <h2>4. Select the sender in Reconsile</h2>
+    <h2>4. Select the sender in sbot</h2>
     <ol>
       <li>Open <strong>Connections</strong> in the desktop app and choose <strong>Gmail</strong>.</li>
       <li>Under <strong>Send from</strong>, select <strong>Custom sender</strong>.</li>
       <li>Enter the verified sender address and save the connection.</li>
       <li>Run a small test reconciliation and confirm the message arrives without an SPF, DKIM, or DMARC warning.</li>
     </ol>
-    <div class="note"><strong>Prefer the quick setup?</strong><p>Select <code>notifications@reconsile.online</code> in Connections. No custom-domain configuration is needed.</p></div>
+    <div class="note"><strong>Prefer the quick setup?</strong><p>Select <code>notifications@sbot.rest</code> in Connections. No custom-domain configuration is needed.</p></div>
     <footer>Never paste your mailbox password into a shared workspace. Use a revocable app password or provider token where available.</footer>
   </main>
 </body>

@@ -14,7 +14,7 @@ pub struct Store {
 
 impl Store {
     pub async fn open() -> Result<Self, String> {
-        let dir = std::env::var_os("RECONSILE_DATA_DIR")
+        let dir = std::env::var_os("SBOT_DATA_DIR")
             .map(PathBuf::from)
             .unwrap_or_else(|| PathBuf::from(".data"));
         tokio::fs::create_dir_all(&dir)
@@ -92,7 +92,7 @@ async fn save_to(path: &Path, data: &AppData) -> Result<(), String> {
 fn initial_state() -> AppData {
     serde_json::from_value(serde_json::json!({
       "connections": {},
-      "settings": {"username":"admin","workspace":"Reconsile agent","accessMode":"open","password":""},
+      "settings": {"username":"admin","workspace":"sbot agent","accessMode":"open","password":""},
       "checks": [
         {"id":"stripe-settlement","name":"Stripe settlement","description":"Orders, payouts and bank deposits","status":"attention","schedule":"Every day · 09:00","scheduleConfig":{"frequency":"daily","time":"09:00","weekday":"1","timezone":"UTC","enabled":true},"lastRun":"Today, 09:02","matchRate":98.7,"prompt":"Match each Stripe charge to an order by order_id. Confirm settled charges appear in the bank feed within 2 business days. Flag duplicates, refunds without a matching charge, and differences above $1.00.","sources":[{"id":"src-orders","name":"Store orders","type":"api","url":"demo://orders","auth":"bearer","token":""},{"id":"src-payouts","name":"Stripe payouts","type":"api","url":"demo://payouts","auth":"bearer","token":""}],"notifications":[{"id":"notif-email","type":"email","label":"Finance inbox","recipient":"finance@acme.test","enabled":true}]},
         {"id":"inventory-count","name":"Warehouse inventory","description":"System quantities vs physical count","status":"healthy","schedule":"Fridays · 17:00","scheduleConfig":{"frequency":"weekly","time":"17:00","weekday":"5","timezone":"UTC","enabled":true},"lastRun":"Aug 1, 17:04","matchRate":100.0,"prompt":"Compare physical_count against system_quantity by sku and flag any non-zero variance.","sources":[{"id":"src-stock","name":"Stock count","type":"url","url":"demo://inventory","auth":"none","token":""}],"notifications":[]}
@@ -118,7 +118,7 @@ mod tests {
     #[tokio::test]
     async fn recovers_runs_interrupted_by_restart() {
         let path = std::env::temp_dir().join(format!(
-            "reconsile-recovery-{}.json",
+            "sbot-recovery-{}.json",
             Utc::now().timestamp_nanos_opt().unwrap_or_default()
         ));
         let store = Store::open_path(path.clone()).await.unwrap();

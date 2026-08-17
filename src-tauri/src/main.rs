@@ -1,6 +1,6 @@
 fn main() {
-    if let Err(error) = reconsile_lib::run() {
-        eprintln!("Reconsile failed: {error}");
+    if let Err(error) = sbot_lib::run() {
+        eprintln!("sbot failed: {error}");
         std::process::exit(1);
     }
 }

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Accounting & Reconciliation"
+  short_description: "Reconcile wallet activity against records and generate accounting reports"
+  default_prompt: "Use accountingReconciliation to reconcile a wallet against records."

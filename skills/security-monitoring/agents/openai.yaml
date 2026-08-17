@@ -1,0 +1,4 @@
+interface:
+  display_name: "Security Monitoring"
+  short_description: "Monitor approvals, unexpected transfers, unfamiliar contracts, and fee balances"
+  default_prompt: "Use securityMonitoring to check a wallet for security issues."
